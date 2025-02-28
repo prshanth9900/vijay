@@ -1,0 +1,32 @@
+Build a project on python based on web scraping
+Steps:
+Install Required Libraries: Make sure you have the necessary libraries installed:
+pip install requests beautifulsoup4 pandas
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+# Step 1: Request the webpage
+url = 'https://example-news-website.com'
+response = requests.get(url)
+
+# Step 2: Parse the HTML content
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Step 3: Extract the data
+# For example, let's say we want to get article titles and URLs
+articles = []
+
+# Assuming the articles are within <article> tags, update according to the structure of the site
+for article in soup.find_all('article'):
+    title = article.find('h2').text  # Adjust to correct tag
+    link = article.find('a')['href']
+    articles.append({'Title': title, 'URL': link})
+
+# Step 4: Save the data to a DataFrame
+df = pd.DataFrame(articles)
+
+# Step 5: Export to CSV
+df.to_csv('news_articles.csv', index=False)
+
+print('Data has been saved to news_articles.csv')
