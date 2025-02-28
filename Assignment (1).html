@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1b6cbc;
+    }
+
+    header {
+      background-color: #24d51b;
+      color: white;
+      padding: 1rem;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+
+    nav ul {
+      display: flex;
+      justify-content: center;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    nav a:hover {
+      background-color: #34495e;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 6rem auto 2rem;
+      padding: 0 1rem;
+    }
+
+    .page {
+      display: none;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .auth-form {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem 0;
+    }
+
+    .product-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .total {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-top: 2rem;
+      text-align: right;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      nav ul {
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .product-image {
+        height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="#" onclick="showPage('login')">Login</a></li>
+        <li><a href="#" onclick="showPage('register')">Register</a></li>
+        <li><a href="#" onclick="showPage('catalog')">Catalog</a></li>
+        <li><a href="#" onclick="showPage('cart')">Cart</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container">
+    <!-- Login Page -->
+    <div id="login" class="page">
+      <form class="auth-form" onsubmit="return loginUser(event)">
+        <h2 style="text-align: center; margin-bottom: 1.5rem; color: #50482c;">Welcome Back!</h2>
+        <div class="form-group">
+          <label>Username:</label>
+          <input type="text" id="loginUsername" required>
+        </div>
+        <div class="form-group">
+          <label>Password:</label>
+          <input type="password" id="loginPassword" required>
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+
+    <!-- Registration Page -->
+    <div id="register" class="page">
+      <form class="auth-form" onsubmit="return registerUser(event)">
+        <h2 style="text-align: center; margin-bottom: 1.5rem; color: #2c3e50;">Create Account</h2>
+        <div class="form-group">
+          <label>Username:</label>
+          <input type="text" id="regUsername" required>
+        </div>
+        <div class="form-group">
+          <label>Password:</label>
+          <input type="password" id="regPassword" required>
+        </div>
+        <button type="submit">Register</button>
+      </form>
+    </div>
+
+    <!-- Catalog Page -->
+    <div id="catalog" class="page">
+      <h2 style="color: #2c3e50; margin-bottom: 1.5rem;">Our Products</h2>
+      <div class="products-grid"></div>
+    </div>
+
+    <!-- Cart Page -->
+    <div id="cart" class="page">
+      <h2 style="color: #2c3e50; margin-bottom: 1.5rem;">Your Cart</h2>
+      <div class="cart-items"></div>
+      <p class="total">Total: $<span class="total-amount">0</span></p>
+    </div>
+  </div>
+
+  <script>
+    // Initialize local storage data
+    if (!localStorage.getItem('users')) localStorage.setItem('users', JSON.stringify([]));
+    if (!localStorage.getItem('products')) {
+      const initialProducts = [
+        { 
+          id: 1, 
+          name: 'Wireless Headphones', 
+          price: 199, 
+          image: 'https://tinyurl.com/r27m9hbw' 
+        },
+        { 
+          id: 2, 
+          name: 'Smart Watch', 
+          price: 299, 
+          image: 'https://tinyurl.com/2sau6vca' 
+        },
+        { 
+          id: 3, 
+          name: 'Bluetooth Speaker', 
+          price: 149, 
+          image: 'https://tinyurl.com/x5bk7sf8' 
+        },
+        { 
+          id: 4, 
+          name: 'Gaming Mouse', 
+          price: 79, 
+          image: 'https://tinyurl.com/3pdcwzs6' 
+        },
+      ];
+      localStorage.setItem('products', JSON.stringify(initialProducts));
+    }
+    if (!localStorage.getItem('carts')) localStorage.setItem('carts', JSON.stringify({}));
+
+    let currentUser = null;
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      if (pageId === 'catalog') loadCatalog();
+      if (pageId === 'cart') loadCart();
+    }
+
+    function registerUser(e) {
+      e.preventDefault();
+      const users = JSON.parse(localStorage.getItem('users'));
+      const username = document.getElementById('regUsername').value;
+      const password = document.getElementById('regPassword').value;
+
+      if (users.some(user => user.username === username)) {
+        alert('Username already exists!');
+        return false;
+      }
+
+      users.push({ username, password });
+      localStorage.setItem('users', JSON.stringify(users));
+      alert('Registration successful!');
+      showPage('login');
+      return false;
+    }
+
+    function loginUser(e) {
+      e.preventDefault();
+      const users = JSON.parse(localStorage.getItem('users'));
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const user = users.find(u => u.username === username && u.password === password);
+      if (!user) {
+        alert('Invalid credentials!');
+        return false;
+      }
+
+      currentUser = username;
+      loadCatalog();
+      showPage('catalog');
+      return false;
+    }
+
+    function loadCatalog() {
+      const products = JSON.parse(localStorage.getItem('products'));
+      const grid = document.querySelector('.products-grid');
+      grid.innerHTML = '';
+
+      products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${product.image}" class="product-image" alt="${product.name}">
+          <h3>${product.name}</h3>
+          <p style="color: #3498db; font-size: 1.2rem; margin: 0.5rem 0;">$${product.price}</p>
+          <button onclick="addToCart(${product.id})">Add to Cart</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function addToCart(productId) {
+      if (!currentUser) {
+        alert('Please login first!');
+        showPage('login');
+        return;
+      }
+
+      const products = JSON.parse(localStorage.getItem('products'));
+      const product = products.find(p => p.id === productId);
+      const carts = JSON.parse(localStorage.getItem('carts'));
+      
+      if (!carts[currentUser]) carts[currentUser] = [];
+      carts[currentUser].push(product);
+      
+      localStorage.setItem('carts', JSON.stringify(carts));
+      alert('Product added to cart!');
+      loadCart();
+    }
+
+    function loadCart() {
+      if (!currentUser) return;
+      
+      const carts = JSON.parse(localStorage.getItem('carts'));
+      const cartItems = carts[currentUser] || [];
+      const cartContainer = document.querySelector('.cart-items');
+      let total = 0;
+      
+      cartContainer.innerHTML = '';
+      cartItems.forEach((item, index) => {
+        total += item.price;
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <div style="flex: 2;">${item.name}</div>
+          <div style="flex: 1; text-align: right;">$${item.price}</div>
+          <button style="margin-left: 1rem;" onclick="removeFromCart(${index})">Remove</button>
+        `;
+        cartContainer.appendChild(div);
+      });
+      
+      document.querySelector('.total-amount').textContent = total;
+    }
+
+    function removeFromCart(index) {
+      const carts = JSON.parse(localStorage.getItem('carts'));
+      carts[currentUser].splice(index, 1);
+      localStorage.setItem('carts', JSON.stringify(carts));
+      loadCart();
+    }
+
+    // Initialize page
+    showPage('login');
+  </script>
+</body>
+</html>
